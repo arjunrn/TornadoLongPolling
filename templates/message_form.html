@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <title>Long Polling Form</title>
+        <style type="text/css">
+            body, input{
+                font-family:serif;
+            }
+            input, textarea, label{
+                clear:both;float:left;
+            }
+            textarea{
+                width:600px;
+                height:200px;
+
+            }
+            .message-form-container{
+                width:800px;
+                margin: 10 auto;
+            }
+            #send-result{
+                float:left;
+                margin:20px 0;
+                clear:both;
+                font-size:20px;
+                text-align:center;
+                width:100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="message-form-container">
+            <form class="message-form" id="message-form">
+                <label>Message</label>
+                <textarea name="message-text"></textarea>
+                <input type="submit" value="Send" />
+            </form>
+            <p id="send-result" ></p>
+        </div>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var $messageForm = $('#message-form');
+                $messageForm.submit(function(e){
+                    e.preventDefault();
+                    var $sendResult = $('#send-result');
+                    var $messageTextarea = $('#message-form textarea');
+                    var message  = $.trim($messageTextarea.val());
+                    if(message == ''){
+                        displaySendResult('Message is Empty');
+                        return;
+                    }
+                    console.log("Message: " + message);
+                    $.ajax({
+                        type : "POST",
+                        url : "/new-message/",
+                        data : {
+                            "body":message,
+                        },
+                        success : function(returnData){
+                            console.log(returnData);
+                            console.log("Sucess");
+                            $messageTextarea.val('');
+                            displaySendResult('Sent Successfully');
+                        },
+                        error : function(jqXHR, textStatus, errorThrown){
+                            console.log("Error sending message");
+                            console.log(textStatus);
+                            displaySendResult('Sending Failed');
+                        },
+                        dataType : 'json',
+                    });
+                    function displaySendResult(resultText){
+                        $sendResult.stop();
+                        $sendResult.text(resultText).hide().fadeIn(2500,function(){
+                            $(this).delay(8000).fadeOut(1000);
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

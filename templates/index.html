@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <title>Long Polling Home</title>
+        <style type="text/css">
+            .message-container{
+                width:800px;
+                margin:150px auto;
+            }
+            .message-container p{
+                width:100%;
+                text-align:center;
+                font-size:80px;
+                margin-top:100px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="message-container">
+            
+        </div>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                var updater = {
+                    errorSleepTime: 500,
+                    poll: function() {
+                        $.ajax({url: "/long-poll/", type: "GET", dataType: "json",
+                            success: updater.onSuccess,
+                            error: updater.onError});
+                    },
+                    onSuccess: function(response) {
+                        try {
+                            displayLatestMessage(response['body'],true);
+                        } catch (e) {
+                            console.log(e);
+                            updater.onError();
+                            return;
+                        }
+                        updater.errorSleepTime = 500;
+                        window.setTimeout(updater.poll, 0);
+                    },
+                    onError: function(response) {
+                        updater.errorSleepTime *= 2;
+                        console.log("Poll error; sleeping for", updater.errorSleepTime, "ms");
+                        window.setTimeout(updater.poll, updater.errorSleepTime);
+                        displayLatestMessage('Receiving Failed',false);
+                    },
+                    newMessages: function(response) {
+                        
+                    },
+                    showMessage: function(message) {
+                        
+                    }
+                };
+
+                updater.poll();
+                function displayLatestMessage(messageText,success){
+                    console.log(messageText);
+                    var $messageContainer = $('.message-container');
+                    $messageContainer.find('p').remove();
+                    var $messageP = $('<p>' + messageText + '</p>');
+                    $messageContainer.append($messageP);
+                    $messageP.hide().fadeIn(2500).delay(10000).fadeOut(2000,function(){
+                        $(this).remove();
+                    });
+                    if(!success){
+                        $messageP.css('color','#AA3355');
+                    }
+                    else{
+                        $messageP.css('color','#33AA55');
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
