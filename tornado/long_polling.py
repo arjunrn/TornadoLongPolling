@@ -40,6 +40,7 @@ class LongPollHandler(tornado.web.RequestHandler, LongPollMixin):
         self.finish()
     
     def on_connection_close(self):
+        print "On Connection Closed"
         self.cancel_wait(self.on_new_message)
         
 
